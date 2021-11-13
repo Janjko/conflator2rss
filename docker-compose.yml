@@ -15,9 +15,9 @@ services:
         build: .
         image: conflator
         volumes:
-            - ~/garden/conflate/:/data/
-            - ~/garden/jsons/:/jsons/
-            - ~/garden/rss/:/rss/
+            - ~/garden/conflate/:/data
+            - ~/garden/jsons/:/jsons
+            - ~/garden/rss/:/rss
         environment:
             - PERIOD=1m
         depends_on:
