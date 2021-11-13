@@ -9,7 +9,7 @@ services:
             - OVERPASS_PLANET_URL=https://download.geofabrik.de/europe/croatia-latest.osm.bz2
             - OVERPASS_DIFF_URL=https://download.geofabrik.de/europe/croatia-updates/
         volumes:
-            - ~\garden\overpass\:/db
+            - ~/garden/overpass/:/db
     conflator:
         container_name: conflator
         build: .
