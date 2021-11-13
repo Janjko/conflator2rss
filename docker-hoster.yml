@@ -1,0 +1,34 @@
+version: "3"
+services:
+    overpass:
+        container_name: overpass-turbo.eu
+        image: wiktorn/overpass-api:0.7.56.4
+        environment:
+            - OVERPASS_META=yes
+            - OVERPASS_MODE=init
+            - OVERPASS_PLANET_URL=https://download.geofabrik.de/europe/croatia-latest.osm.bz2
+            - OVERPASS_DIFF_URL=https://download.geofabrik.de/europe/croatia-updates/
+        volumes:
+            - C:\Users\janko\source\garden\overpass\:/db
+    conflator:
+        container_name: conflator
+        build: .
+        image: conflator
+        volumes:
+            - C:\Users\janko\source\garden\conflate\:/data/
+            - C:\Users\janko\source\garden\jsons\:/jsons/
+            - C:\Users\janko\source\garden\rss\:/rss/
+        environment:
+            - PERIOD=1m
+        depends_on:
+            - "overpass"
+            - "nominatim"
+    nominatim:
+        container_name: nominatim
+        image: mediagis/nominatim:3.7
+        volumes:
+            - C:\Users\janko\source\garden\nominatim\:/var/lib/postgresql/12/main
+        environment:
+            - PBF_URL=https://download.geofabrik.de/europe/croatia-latest.osm.pbf
+            - REPLICATION_URL=https://download.geofabrik.de/europe/croatia-updates
+
