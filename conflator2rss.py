@@ -5,7 +5,6 @@ import os
 import shutil
 import argparse
 import json
-from dateutil import tz
 import jsondiff as jd
 from jsondiff import diff
 from feedgen.feed import FeedGenerator
@@ -26,7 +25,7 @@ ELEMENT_REF = 'element_ref'
 OSM_ID = 'osm_id'
 
 RSS_RAW_FILENAME = "rss_raw.json"
-RSS_FILENAME = "rss.xml"
+#RSS_FILENAME = "rss.xml"
 
 fg = FeedGenerator()
 fg.id('http://lernfunk.de/media/654321')
@@ -51,25 +50,32 @@ parser.add_argument('-n', '--new', type=argparse.FileType('r',
                     encoding='utf-8'), help='New file')
 parser.add_argument('-i', '--inspected', type=argparse.FileType('r',
                     encoding='utf-8'), help='Output OSM XML file name')
-parser.add_argument('-o', '--output', type=argparse.FileType('w',
-                    encoding='utf-8'), help='Original file')
+parser.add_argument(
+    '-r', '--rss', type=argparse.FileType('w'), help='RSS XML file')
 
-options = parser.parse_args(["-n", "C:\\Users\\Janko\\source\\garden\\jsons\\current\\changes.json", "-i",
-                            "C:\\Users\\Janko\\source\\garden\\jsons\\current\\inspected.json", "-o", "C:\\Users\\Janko\\source\\garden\\jsons\\current\\output.json"])
+#options = parser.parse_args(["-n", "C:\\Users\\Janko\\source\\garden\\jsons\\current\\changes.json", "-i",
+#                           "C:\\Users\\Janko\\source\\garden\\jsons\\inspected\\changes.json", "-r", "C:\\Users\\Janko\\source\\garden\\jsons\\current\\rss.xml"])
 
+options = parser.parse_args()
 
-with open(RSS_RAW_FILENAME) as json_file:
-    rss_raw = json.load(json_file)
+n = 1
 
-numbers = rss_raw.keys()
+try:
+    with open(RSS_RAW_FILENAME, 'r') as json_file:
+        rss_raw = json.load(json_file)
+        numbers = rss_raw.keys()
+        if len(numbers) > 0:
+            n = int(max(numbers))+1
+except IOError:
+    with open(RSS_RAW_FILENAME, 'w') as json_file:
+        json.dump(rss_raw, json_file)
 
-n = int(max(numbers))+1
+oldJson = json.load(options.inspected)
 newJson = json.load(options.new)
-inspectedJson = json.load(options.inspected)
 
-for element in newJson['features']:
+for element in oldJson['features']:
     matches = list(filter(lambda x: (
-        x['properties']['ref_id'] == element['properties']['ref_id']), inspectedJson['features']))
+        x['properties']['ref_id'] == element['properties']['ref_id']), newJson['features']))
     if len(matches) == 0:
         if element['properties']['action'] == 'create':
             rss_raw.update({n: {CHANGE_STATUS: change_status.CREATE_NONE,
@@ -81,18 +87,18 @@ for element in newJson['features']:
             n += 1
 
     for matched_element in matches:
-        if element['properties']['action'] == 'create' and element['properties']['action'] == 'modify':
+        if element['properties']['action'] == 'create' and matched_element['properties']['action'] == 'modify':
             rss_raw.update({n: {CHANGE_STATUS: change_status.CREATE_MODIFY,
                                 ELEMENT_REF: element['properties']['ref_id']}})
             n += 1
 
-        if element['properties']['action'] == 'modify' and element['properties']['action'] == 'create':
+        if element['properties']['action'] == 'modify' and matched_element['properties']['action'] == 'create':
             rss_raw.update({n: {CHANGE_STATUS: change_status.MODIFY_CREATE,
                                 ELEMENT_REF: element['properties']['ref_id']}})
             n += 1
 
-for element in inspectedJson['features']:
-    if not any(x['properties']['ref_id'] == element['properties']['ref_id'] for x in newJson['features']):
+for element in newJson['features']:
+    if not any(x['properties']['ref_id'] == element['properties']['ref_id'] for x in oldJson['features']):
         if element['properties']['action'] == 'create':
             rss_raw.update({n: {CHANGE_STATUS: change_status.NONE_CREATE,
                            ELEMENT_REF: element['properties']['ref_id']}})
@@ -126,4 +132,4 @@ for entry in rss_raw:
                        element['properties']['ref_id'] + ' ucrtan, ali sa lošim tagovima.')
 
 
-fg.rss_file(RSS_FILENAME)
+fg.rss_file(options.rss.name)
