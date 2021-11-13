@@ -9,15 +9,15 @@ services:
             - OVERPASS_PLANET_URL=https://download.geofabrik.de/europe/croatia-latest.osm.bz2
             - OVERPASS_DIFF_URL=https://download.geofabrik.de/europe/croatia-updates/
         volumes:
-            - C:\Users\janko\source\garden\overpass\:/db
+            - ~\garden\overpass\:/db
     conflator:
         container_name: conflator
         build: .
         image: conflator
         volumes:
-            - C:\Users\janko\source\garden\conflate\:/data/
-            - C:\Users\janko\source\garden\jsons\:/jsons/
-            - C:\Users\janko\source\garden\rss\:/rss/
+            - ~\garden\conflate\:/data/
+            - ~\garden\jsons\:/jsons/
+            - ~\garden\rss\:/rss/
         environment:
             - PERIOD=1m
         depends_on:
@@ -27,7 +27,7 @@ services:
         container_name: nominatim
         image: mediagis/nominatim:3.7
         volumes:
-            - C:\Users\janko\source\garden\nominatim\:/var/lib/postgresql/12/main
+            - ~\garden\nominatim\:/var/lib/postgresql/12/main
         environment:
             - PBF_URL=https://download.geofabrik.de/europe/croatia-latest.osm.pbf
             - REPLICATION_URL=https://download.geofabrik.de/europe/croatia-updates
