@@ -15,9 +15,9 @@ services:
         build: .
         image: conflator
         volumes:
-            - ~\garden\conflate\:/data/
-            - ~\garden\jsons\:/jsons/
-            - ~\garden\rss\:/rss/
+            - ~/garden/conflate/:/data/
+            - ~/garden/jsons/:/jsons/
+            - ~/garden/rss/:/rss/
         environment:
             - PERIOD=1m
         depends_on:
@@ -27,7 +27,7 @@ services:
         container_name: nominatim
         image: mediagis/nominatim:3.7
         volumes:
-            - ~\garden\nominatim\:/var/lib/postgresql/12/main
+            - ~/garden/nominatim/:/var/lib/postgresql/12/main
         environment:
             - PBF_URL=https://download.geofabrik.de/europe/croatia-latest.osm.pbf
             - REPLICATION_URL=https://download.geofabrik.de/europe/croatia-updates
